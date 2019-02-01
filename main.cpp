@@ -1,17 +1,28 @@
-#include<iostream>
-#include <fstream>
-#include<string>
-
+#include"Point.h"
+#include"Line.h"
+#include"Triangle.h"
+#include"Polygon.h"
+#include<sstream>
 using namespace std;
 
 int main(int argc, const char * argv[])
 {
-	int x;
-	int sum = 0;
-	int size = 2;
-	int number = 0;
-	int* numbers = new int[size];
+	cout.unsetf(std::ios::floatfield);                // floatfield not set
+	cout.precision(3);
+	float x;
+	int size[2];
+	size[0] = 2;
+	size[1] = 2;
 
+	int number[2];
+	number[0] = 0;
+	number[1] = 0;
+	float* numbers[2];
+	numbers[0] = new float[size[0]];
+	numbers[1] = new float[size[1]];
+	Shape* shapes[2];
+	string line;
+	int p = 0;
 	ifstream inFile;
 	inFile.open(argv[1]);
 
@@ -21,49 +32,102 @@ int main(int argc, const char * argv[])
 	}
 	else
 	{
-		cout << "Input: ";
-		while (inFile >> x)
+		
+		while (getline(inFile,line))
 		{
-			if (number<size)
+	
+			istringstream row(line);
+
+			while (row >> x)
 			{
-				sum += x;
-				numbers[number] = x;
-				number++;
+				if (number<size)
+				{
+
+					numbers[p][number[p]] = x;
+					number[p]++;
+				}
+				else
+				{
+					float* temp = new float[size[p]];
+					for (int i = 0; i < size[p]; i++)
+					{
+						temp[i] = numbers[p][i];
+					}
+					delete[] numbers[p];
+					size[p]++;
+					numbers[p] = new float[size[p]];
+					for (int i = 0; i < size[p] - 1; i++)
+					{
+						numbers[p][i] = temp[i];
+					}
+					delete[] temp;
+
+
+					numbers[p][number[p]] = x;
+					number[p]++;
+				}
+			
+			
+
+
+			}
+			p++;
+
+		}
+
+		for (int i = 0; i < 2; i++)
+		{
+			if (number[i] == 2)
+			{
+
+				shapes[i] = new Point(numbers[i][0], numbers[i][1]);
+			}
+			else if (number[i] == 4)
+			{
+
+				shapes[i] = new Line(numbers[i][0], numbers[i][1], numbers[i][2], numbers[i][3]);
+			}
+			else if (number[i] == 6)
+			{
+				shapes[i] = new Triangle(numbers[i][0], numbers[i][1], numbers[i][2], numbers[i][3], numbers[i][4], numbers[i][5]);
 			}
 			else
 			{
-				int* temp = new int[size];
-				for (int i = 0; i < size; i++)
-				{
-					temp[i] = numbers[i];
-				}
-				delete[] numbers;
-				numbers = new int[++size];
-				for (int i = 0; i < size - 1; i++)
-				{
-					numbers[i] = temp[i];
-				}
-				delete[] temp;
-
-				sum += x;
-				numbers[number++] = x;
+				shapes[i] = new Polygon(numbers[i], number[i]);
 			}
-			cout << to_string(x) << " ";
-		}
-		int avarage = sum / size;
-		cout << "          Output: ";
-		for (int i = 0; i < size; i++)
-		{
-			if (numbers[i] > avarage)
+
+			cout << "Input: ";
+			for (int z = 0; z < number[i]; z++)
 			{
-				cout << to_string(numbers[i]) << " ";
+				cout << shapes[i]->getVertices()[z] << " ";
 			}
-
+		
+			cout << endl;
 		}
-		cout << endl;
-	}
 
+		shapes[0] = *shapes[0] + *shapes[1];
+	
+		
+		
+		cout << "Output: ";
+	
+		
+	
+		//cout << *shapes[0];
+
+		cout <<  shapes[0]->area();
+
+	
+		
+
+		cout << endl;
+
+		delete shapes[0];
+		delete shapes[1];
+	}
+	delete[] numbers[0];
+	delete[] numbers[1];
+	
 	system("pause");
-	delete[] numbers;
 	return 0;
 }
